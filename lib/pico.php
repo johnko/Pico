@@ -13,7 +13,7 @@ class Pico {
 		if($request_url != $script_url) $url = trim(preg_replace('/'. str_replace('/', '\/', str_replace('index.php', '', $script_url)) .'/', '', $request_url, 1), '/');
 
 		// Get the file path
-		if($url) $file = strtolower(CONTENT_DIR . $url);
+		if($url) $file = CONTENT_DIR . $url;
 		else $file = CONTENT_DIR .'index';
 
 		// Load the file
