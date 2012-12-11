@@ -109,7 +109,7 @@ class Pico {
 			'site_title' => 'Pico',
 			'base_url' => $this->base_url(),
 			'theme' => 'default',
-			'enable_cache' => false
+			'enable_cache' => false,
 			'draft_auth' => false
 		);
 
