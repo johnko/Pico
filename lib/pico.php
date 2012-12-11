@@ -33,7 +33,7 @@ class Pico {
 		else $file = CONTENT_DIR .'index';
 
 		// Load the file
-		if(is_dir($file)) $file = CONTENT_DIR . $url . '/index.' . $ext;
+		if(is_dir($file)) $file = CONTENT_DIR . $url . '/index' . $ext;
 		else $file .= $ext;
 
 		if(file_exists($file)) $content = file_get_contents($file);
