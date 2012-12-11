@@ -12,26 +12,40 @@ class Pico {
 		// Get our url path and trim the / of the left and the right
 		if($request_url != $script_url) $url = trim(preg_replace('/'. str_replace('/', '\/', str_replace('index.php', '', $script_url)) .'/', '', $request_url, 1), '/');
 
-		// Get the file path
-		if($url) $file = CONTENT_DIR . $url;
-		else $file = CONTENT_DIR .'index';
-
-		// Load the file
-		if(is_dir($file)) $file = CONTENT_DIR . $url .'/index.txt';
-		else $file .= '.txt';
-
-		if(file_exists($file)) $content = file_get_contents($file);
-		else $content = file_get_contents(CONTENT_DIR .'404.txt');
-
-		$meta = $this->read_file_meta($content);
-		$content = preg_replace('#/\*.+?\*/#s', '', $content); // Remove comments and meta
-		$content = $this->parse_content($content);
-
 		// Load the settings
 		$settings = $this->get_config();
 		$env = array('autoescape' => false);
 		if($settings['enable_cache']) $env['cache'] = CACHE_DIR;
 
+		if($settings['draft_auth'] !== false && strpos($url, '?draft') - strlen($url) + 6 === 0) $ext = '.draft';
+		else $ext = '.txt';
+
+		if($ext === '.draft') {
+			if(!$this->draft_auth($settings['draft_auth'])) {
+				header('WWW-Authenticate: Basic realm="'.$settings['site_title'].'"', true, 401);
+				exit;
+			}
+			$url = substr($url, 0, strlen($url) - 6);
+		}
+
+		// Get the file path
+		if($url) $file = CONTENT_DIR . $url;
+		else $file = CONTENT_DIR .'index';
+
+		// Load the file
+		if(is_dir($file)) $file = CONTENT_DIR . $url . '/index.' . $ext;
+		else $file .= $ext;
+
+		if(file_exists($file)) $content = file_get_contents($file);
+		else {
+			$content = file_get_contents(CONTENT_DIR .'404.txt');
+			header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
+		}
+
+		$meta = $this->read_file_meta($content);
+		$content = preg_replace('#/\*.+?\*/#s', '', $content); // Remove comments and meta
+		$content = $this->parse_content($content);
+		
 		// Load the theme
 		Twig_Autoloader::register();
 		$loader = new Twig_Loader_Filesystem(THEMES_DIR . $settings['theme']);
@@ -46,6 +60,15 @@ class Pico {
 			'meta' => $meta,
 			'content' => $content
 		));
+	}
+
+	function draft_auth($credentials) {
+		if(!isset($_SERVER['HTTP_AUTHORIZATION']))
+		{
+			return false;
+		}
+
+		return $_SERVER['HTTP_AUTHORIZATION'] === 'Basic '.base64_encode($credentials);
 	}
 
 	function parse_content($content)
@@ -86,6 +109,9 @@ class Pico {
 			'base_url' => $this->base_url(),
 			'theme' => $headers['theme'] ? $headers['theme'] : 'default',
 			'enable_cache' => false
+			'theme' => 'default',
+			'enable_cache' => false,
+			'draft_auth' => false
 		);
 
 		foreach($defaults as $key=>$val){
@@ -105,16 +131,8 @@ class Pico {
 		$script_url  = (isset($_SERVER['PHP_SELF'])) ? $_SERVER['PHP_SELF'] : '';
 		if($request_url != $script_url) $url = trim(preg_replace('/'. str_replace('/', '\/', str_replace('index.php', '', $script_url)) .'/', '', $request_url, 1), '/');
 
-		$protocol = $this->get_protocol();
-		return rtrim(str_replace($url, '', $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']), '/');
+		return rtrim(str_replace($url, '', "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']), '/');
 	}
-
-	function get_protocol()
-	{
-		preg_match("|^HTTP[S]?|is",$_SERVER['SERVER_PROTOCOL'],$m);
-		return strtolower($m[0]);
-	}
-
 }
 
 ?>
