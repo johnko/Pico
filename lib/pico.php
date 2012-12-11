@@ -109,8 +109,6 @@ class Pico {
 			'base_url' => $this->base_url(),
 			'theme' => $headers['theme'] ? $headers['theme'] : 'default',
 			'enable_cache' => false
-			'theme' => 'default',
-			'enable_cache' => false,
 			'draft_auth' => false
 		);
 
