@@ -55,6 +55,16 @@ There are also certain variables that you can use in your text files:
 
 * &#37;base_url&#37; - The URL to your Pico site
 
+#### Custom variables
+
+Custom variables can be referenced in your markdown like:
+
+* &#37;custom_setting&#37;
+
+which produces:
+
+%custom_setting%
+
 Themes
 ------
 
