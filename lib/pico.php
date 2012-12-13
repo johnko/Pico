@@ -18,7 +18,7 @@ class Pico {
 		if($settings['enable_cache']) $env['cache'] = CACHE_DIR;
 
 		if($settings['draft_auth'] !== false && strpos($url, '?draft') - strlen($url) + 6 === 0) $ext = '.draft';
-		else $ext = '.txt';
+		else $ext = '.md';
 
 		if($ext === '.draft') {
 			if(!$this->draft_auth($settings['draft_auth'])) {
@@ -38,7 +38,7 @@ class Pico {
 
 		if(file_exists($file)) $content = file_get_contents($file);
 		else {
-			$content = file_get_contents(CONTENT_DIR .'404.txt');
+			$content = file_get_contents(CONTENT_DIR .'404.md');
 			header($_SERVER['SERVER_PROTOCOL'].' 404 Not Found');
 		}
 
