@@ -1,1 +1,10 @@
 Pico is a stupidly simple, blazing fast, flat file CMS. See http://johnko.github.com/Pico/ for more info.
+
+Added by howlingmad:
+-- changed from .txt extension to .md
+-- automatic navigation generation
+-- unique identifier for custom variables, make them available in the markdown files
+
+Alex Kilgour   
+-- [http://kil.gr](http://kil.gr)   
+-- [@howlingmad](http://twitter.com/howlingmad)
