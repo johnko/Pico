@@ -28,6 +28,9 @@ class Pico {
 			$url = substr($url, 0, strlen($url) - 6);
 		}
 
+		// load the navigation
+		$navigation = $this->get_navigation();
+
 		// Get the file path
 		if($url) $file = CONTENT_DIR . $url;
 		else $file = CONTENT_DIR .'index';
@@ -59,7 +62,8 @@ class Pico {
 			'theme_url' => $settings['base_url'] .'/'. basename(THEMES_DIR) .'/'. $theme,
 			'site_title' => $settings['site_title'],
 			'meta' => $meta,
-			'content' => $content
+			'content' => $content,
+			'navigation' => $navigation
 		));
 	}
 
@@ -148,6 +152,153 @@ class Pico {
 		}
 		return $changedContent;
 	}
+
+	// build the navigation
+	function get_navigation()
+	{
+		$start = "<nav><ul>";
+		$end = "</nav></ul>";
+		$main = $this->make_nav();
+		
+		return $start.$main.$end;
+	}
+
+	// building the navigation based on:
+	// http://kvz.io/blog/2007/10/03/convert-anything-to-tree-structures-in-php/
+
+	// capture the folder structure into an array of string
+	function make_nav()
+	{
+		$data = '';
+		if(exec("find ".CONTENT_DIR, $files)){
+		    $key_files = array_combine(array_values($files), array_values($files));
+		    $key_files_sorted = array();
+		    $replaceValue = rtrim(CONTENT_DIR, "/");
+		    foreach ($key_files as $k => $v) {
+			    $key = str_replace($replaceValue, '', $k);
+			    $value = str_replace($replaceValue, '', $v);
+			    if($key !== '' && strpos($key,'404') === false && strpos($key,'index.') === false){
+			    	if($key === "/"){
+			    		$key = "home";
+			    		$value = "home";
+			    	}
+			    	$key_files_sorted[$key] = $value;
+			    }
+
+			}
+		    $tree = $this->explode_tree($key_files_sorted, "/");		}
+
+		return $this->make_list($tree, '');
+	}
+
+	// convert nav array into tree structure (multi-dimensional array)
+	function explode_tree($array, $delimiter = '_', $baseval = false)
+	{
+	    if(!is_array($array)) return false;
+	    $splitRE   = '/' . preg_quote($delimiter, '/') . '/';
+	    $returnArr = array();
+	    foreach ($array as $key => $val) {
+	        // Get parent parts and the current leaf
+	        $parts    = preg_split($splitRE, $key, -1, PREG_SPLIT_NO_EMPTY);
+	        $leafPart = array_pop($parts);
+
+	        // build parent structure 
+	        // might be slow for really deep and large structures
+	        $parentArr = &$returnArr;
+	        foreach ($parts as $part) {
+	            if (!isset($parentArr[$part])) {
+	                $parentArr[$part] = array();
+	            } elseif (!is_array($parentArr[$part])) {
+	                if ($baseval) {
+	                    $parentArr[$part] = array('__base_val' => $parentArr[$part]);
+	                } else {
+	                    $parentArr[$part] = array(); 
+	                }
+	            }
+	            $parentArr = &$parentArr[$part];
+	        }
+
+	        // add the final part to the structure
+	        if (empty($parentArr[$leafPart])) {
+	            $parentArr[$leafPart] = $val;
+	        } elseif ($baseval && is_array($parentArr[$leafPart])) {
+	            $parentArr[$leafPart]['__base_val'] = $val;
+	        }
+	    }
+	    return $returnArr;
+	}
+
+	// check if there is an index file in the folder 
+	function check_index($value)
+	{
+    	$filename = CONTENT_DIR.preg_replace( "/^\//", '', $value );
+    	if($value === 'home'){
+    		$filename = preg_replace( "/\/home$/", '', $filename );
+    	}
+    	$filename = $filename."/index.md";
+    	// check this is a folder 
+    	if( substr( $value, -strlen( '.md' ) ) !== '.md' ){
+    		// if a folder, check an index file exists
+    		if ( file_exists( $filename ) ) {
+    			return true;
+    		}
+    		return false;
+    	}
+
+    	return true;
+	}
+
+	// turn multi-dimensional array into html
+	function make_list($array, $parents)
+	{ 
+        // base case: an empty array produces no list 
+        if (empty($array)) return '';
+
+        $output = '';
+        foreach ($array as $key => $value){
+        	if(is_array($value)){
+        		$prefix = $parents;
+        		// build up the parents string
+        		$parents .= $key.'/';
+        		// tidy up the display
+        		$k = preg_replace( "/-/", ' ', $key );
+        		// does this folder have an index file
+        		if( $this->check_index('/'.$prefix.$key) ){
+            		$output .= '<li><a href="'.$this->base_url().'/'.$prefix.$key.'">'.$k.'</a><ul>'.$this->make_list($value, $parents).'</ul>'.'</li>';
+            	} else {
+            		$output .= '<li>'.$k.'<ul>'.$this->make_list($value, $parents).'</ul>'.'</li>';
+            	}
+            } else {
+            	// trim end of value until first /
+	            $trim = preg_replace( "/\/[^\/]*$/", '', $value );
+
+            	// check if this is the home link
+            	if($key === 'home'){
+            		$key = $this->base_url();
+            	} else {
+            		// used trimmed value to generate the link ($key)
+            		$key = $this->base_url().$trim.'/'.$key;
+            		// now remove trim string from the value to leave the last node
+            		$trim = ltrim($trim, '/');
+            		$value = str_replace($trim, '', $value);
+            	}
+            	
+            	// tidy up the links (keys) and values
+            	$v = ltrim($value, '/');
+            	$v = rtrim($v, '.md');
+            	$k = rtrim($key, '.md');
+            	$v = preg_replace( "/-/", ' ', $v );
+
+            	if($this->check_index($value)){
+            		$output .= '<li><a href="'.$k.'">'.$v.'</a></li>';
+            	} else {
+            		$output .= '<li>'.$v.'</li>';
+            	}
+            }
+        }
+         
+        return $output; 
+    }
 }
 
 ?>
