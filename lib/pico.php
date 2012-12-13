@@ -2,6 +2,8 @@
 
 class Pico {
 
+	static $index = 0;
+
 	function __construct()
 	{
 		// Get request url and script url
@@ -79,8 +81,7 @@ class Pico {
 	function parse_content($content)
 	{
 		$content = str_replace('%base_url%', $this->base_url(), $content);
-		// custom variables available in the markdown
-		$content = $this->custom_vars($content);
+		$content = $this->custom_vars($content); // custom variables available in the markdown
 		$content = Markdown($content);
 
 		return $content;
@@ -142,10 +143,10 @@ class Pico {
 	// replace custom variables within the content
 	function custom_vars($c)
 	{
-		global $customconfig;
+		global $natureconfig;
 		$changedContent = $c;
 
-		foreach($customconfig as $key=>$val){
+		foreach($natureconfig as $key=>$val){
 			if(isset($val) && $val){
 				$changedContent = str_replace('%'.$key.'%', $val, $changedContent);
 			}
@@ -166,7 +167,7 @@ class Pico {
 	// building the navigation based on:
 	// http://kvz.io/blog/2007/10/03/convert-anything-to-tree-structures-in-php/
 
-	// capture the folder structure into an array of string
+	// capture the folder structure into an associative array
 	function make_nav()
 	{
 		$data = '';
@@ -184,11 +185,11 @@ class Pico {
 			    	}
 			    	$key_files_sorted[$key] = $value;
 			    }
-
 			}
-		    $tree = $this->explode_tree($key_files_sorted, "/");		}
+		    $tree = $this->explode_tree($key_files_sorted, "/");
+		}
 
-		return $this->make_list($tree, '');
+		return $this->make_list($tree, $key_files_sorted);
 	}
 
 	// convert nav array into tree structure (multi-dimensional array)
@@ -249,27 +250,36 @@ class Pico {
 	}
 
 	// turn multi-dimensional array into html
-	function make_list($array, $parents)
-	{ 
-        // base case: an empty array produces no list 
+	function make_list($array, $keyarray)
+	{
+		// copy values from original associative array into an indexed array
+		$keyvalues = array_values($keyarray);
+
+		// base case: an empty array produces no list 
         if (empty($array)) return '';
 
         $output = '';
         foreach ($array as $key => $value){
+        	// where are we in the recursive loop
+			$index = Pico::$index;
+
+        	// find the url from the $keyvalues array
+			$location = $keyvalues[$index];
+
+			// increment the count
+            Pico::$index++;
+
         	if(is_array($value)){
-        		$prefix = $parents;
-        		// build up the parents string
-        		$parents .= $key.'/';
         		// tidy up the display
         		$k = preg_replace( "/-/", ' ', $key );
         		// does this folder have an index file
-        		if( $this->check_index('/'.$prefix.$key) ){
-            		$output .= '<li><a href="'.$this->base_url().'/'.$prefix.$key.'">'.$k.'</a><ul>'.$this->make_list($value, $parents).'</ul>'.'</li>';
+        		if( $this->check_index($location) ){
+            		$output .= '<li class="'.$key.'"><a href="'.$this->base_url().$location.'">'.$k.'</a><ul>'.$this->make_list($value, $keyvalues).'</ul>'.'</li>';
             	} else {
-            		$output .= '<li>'.$k.'<ul>'.$this->make_list($value, $parents).'</ul>'.'</li>';
+            		$output .= '<li class="'.$key.'">'.$k.'<ul>'.$this->make_list($value, $keyvalues).'</ul>'.'</li>';
             	}
             } else {
-            	// trim end of value until first /
+				// trim end of value until first /
 	            $trim = preg_replace( "/\/[^\/]*$/", '', $value );
 
             	// check if this is the home link
@@ -287,18 +297,20 @@ class Pico {
             	$v = ltrim($value, '/');
             	$v = rtrim($v, '.md');
             	$k = rtrim($key, '.md');
+            	$class = $v;
             	$v = preg_replace( "/-/", ' ', $v );
 
             	if($this->check_index($value)){
-            		$output .= '<li><a href="'.$k.'">'.$v.'</a></li>';
+            		$output .= '<li class="'.$class.'"><a href="'.$k.'">'.$v.'</a></li>';
             	} else {
-            		$output .= '<li>'.$v.'</li>';
+            		$output .= '<li class="'.$class.'">'.$v.'</li>';
             	}
             }
         }
          
         return $output; 
     }
+
 }
 
 ?>
