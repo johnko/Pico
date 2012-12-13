@@ -75,6 +75,8 @@ class Pico {
 	function parse_content($content)
 	{
 		$content = str_replace('%base_url%', $this->base_url(), $content);
+		// custom variables available in the markdown
+		$content = $this->custom_vars($content);
 		$content = Markdown($content);
 
 		return $content;
@@ -131,6 +133,20 @@ class Pico {
 		if($request_url != $script_url) $url = trim(preg_replace('/'. str_replace('/', '\/', str_replace('index.php', '', $script_url)) .'/', '', $request_url, 1), '/');
 
 		return rtrim(str_replace($url, '', "//" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']), '/');
+	}
+
+	// replace custom variables within the content
+	function custom_vars($c)
+	{
+		global $customconfig;
+		$changedContent = $c;
+
+		foreach($customconfig as $key=>$val){
+			if(isset($val) && $val){
+				$changedContent = str_replace('%'.$key.'%', $val, $changedContent);
+			}
+		}
+		return $changedContent;
 	}
 }
 
