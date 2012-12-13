@@ -60,7 +60,7 @@ Installing via Composer
 
 .. code-block:: bash
 
-    curl -s http://getcomposer.org/installer | php``
+    curl -s http://getcomposer.org/installer | php
 
 2. Create a ``composer.json`` file in your project root:
 
@@ -68,7 +68,7 @@ Installing via Composer
 
     {
         "require": {
-            "twig/twig": "1.6.0"
+            "twig/twig": "1.*"
         }
     }
 
@@ -77,6 +77,10 @@ Installing via Composer
 .. code-block:: bash
 
     php composer.phar install
+
+.. note::
+    If you want to learn more about Composer, the ``composer.json`` file syntax
+    and its usage, you can read the `online documentation`_.
 
 Installing the C extension
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +106,9 @@ Finally, enable the extension in your ``php.ini`` configuration file:
     extension=twig.so
 
 And from now on, Twig will automatically compile your templates to take
-advantage of the C extension.
+advantage of the C extension. Note that this extension does not replace the
+PHP code but only provides an optimized version of the
+``Twig_Template::getAttribute()`` method.
 
 .. tip::
 
@@ -120,6 +126,11 @@ The first step to use Twig is to register its autoloader::
 
 Replace the ``/path/to/lib/`` path with the path you used for Twig
 installation.
+
+If you have installed Twig via Composer you can take advantage of Composer's
+autoload mechanism by replacing the previous snippet for::
+
+    require_once '/path/to/vendor/autoload.php'
 
 .. note::
 
@@ -144,10 +155,11 @@ filesystem loader::
 
     $loader = new Twig_Loader_Filesystem('/path/to/templates');
     $twig = new Twig_Environment($loader, array(
-      'cache' => '/path/to/compilation_cache',
+        'cache' => '/path/to/compilation_cache',
     ));
 
     echo $twig->render('index.html', array('name' => 'Fabien'));
 
 .. _`download page`: https://github.com/fabpot/Twig/tags
+.. _`online documentation`: http://getcomposer.org/doc
 .. _`pre-build DLL`: https://github.com/stealth35/stealth35.github.com/downloads
