@@ -18,7 +18,7 @@ folder and that becomes a page. For example this file is called `index.txt` and 
 
 If you created folder within the content folder (e.g. `content/sub`) and put an `index.txt` inside it, you can access that folder at the URL
 `http://yousite.com/sub`. If you want another page within the sub folder, simply create a text file with the corresponding name (e.g. `content/sub/page.txt`)
-and will be able to access it from the URL `http://yousite.com/sub/page`. Below we've shown some examples of content locations and their corresponing URL's:
+and will be able to access it from the URL `http://yousite.com/sub/page`. Below we've shown some examples of content locations and their corresponding URL's:
 
 <table>
 	<thead>
@@ -38,7 +38,7 @@ If a file cannot be found, the file `content/404.txt` will be shown.
 Text File Markup
 ----------------
 
-Text files are marked up using [Markdown](http://daringfireball.net/projects/markdown/syntax). They can also contain regular HTML.
+Text files are marked up using [Markdown](http://daringfireball.net/projects/markdown/syntax). This fork is using [PHP Markdown Extra](http://michelf.ca/projects/php-markdown/extra/). They can also contain regular HTML.
 
 At the top of text files you can place a block comment and specify certain attributes of the page. For example:
 
@@ -74,14 +74,15 @@ in config.php to your theme folder.
 
 All themes must include an `index.html` file to define the HTML structure of the theme. Below are the Twig variables that are available to use in your theme:
 
-* `{{ config }}` - Conatins the values you set in config.php (e.g. `{{ config.theme }}` = "default")
+* `{{ config }}` - Contains the values you set in config.php (e.g. `{{ config.theme }}` = "default")
 * `{{ base_dir }}` - The path to your Pico root directory
 * `{{ base_url }}` - The URL to your Pico site
-* `{{ theme_dir }}` - The path to the Pico active theme direcotry
-* `{{ theme_url }}` - The URL to the Pico active theme direcotry
+* `{{ theme_dir }}` - The path to the Pico active theme directory
+* `{{ theme_url }}` - The URL to the Pico active theme directory
 * `{{ site_title }}` - Shortcut to the site title (defined in config.php)
 * `{{ meta }}` - Contains the meta values from the current page (e.g. `{{ meta.title }}`, `{{ meta.description }}`, `{{ meta.robots }}`, `{{meta.theme}}`)
 * `{{ content }}` - The content of the current page (after it has been processed through Markdown)
+* `{{ navigation }}` - The automatically generated navigation of the content folder
 
 Config
 ------
