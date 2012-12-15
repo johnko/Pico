@@ -80,13 +80,16 @@ function php_file_tree_dir($directory, $return_link, $extensions = array(), $ver
 		if( $first_call ) { $php_file_tree .= " class=\"php-file-tree\""; $first_call = false; }
 		$php_file_tree .= ">";
 		foreach( $file as $this_file ) {
-			if( $this_file != "." && $this_file != ".." ) {
+			if( 1 === preg_match( "/content\/index.md/", "$directory/$this_file" ) ) {
+				$php_file_tree .= "<li class=\"pft-file indexmd\"><a href=\"/\">Home</a></li>";
+			}
+			if( $this_file != "." && $this_file != ".." && ( $version === "pico" && $this_file !== "index.md" ) && ( $version === "pico" && $this_file !== "404.md" ) ) {
 				if( is_dir("$directory/$this_file") ) {
 					// Directory
 					$php_file_tree .= "<li class=\"pft-directory\"><a href=\"";
 					if( $version === "pico" ) {
 						if( file_exists( "$directory/$this_file"."/index.md" ) ) {
-							$php_file_tree .= preg_replace("/\.\/content\//", "./", "$directory/$this_file");
+							$php_file_tree .= preg_replace("/\.\/content\//", "/", "$directory/$this_file");
 						}
 					} else {
 						$php_file_tree .= "#";
@@ -102,13 +105,10 @@ function php_file_tree_dir($directory, $return_link, $extensions = array(), $ver
 					if( $version !== "pico" ) {
 						$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
 					} else {
-						if( $this_file !== "index.md" ) {
-							$link = str_replace("[link]", "$directory/" . urlencode($this_file), $return_link);
-							$link = preg_replace("/\.\/content\//", "./", $link);
-							$link = preg_replace("/\.md$/", "", $link);
-							$this_file = preg_replace("/\.md$/", "", $this_file);
-							$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
-						}
+						$link = preg_replace("/\.\/content\//", "/", $link);	//remove content folder
+						$link = preg_replace("/\.md$/", "", $link);				//remove md
+						$this_file = preg_replace("/\.md$/", "", $this_file);	//remove md
+						$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
 					}
 				}
 			}
