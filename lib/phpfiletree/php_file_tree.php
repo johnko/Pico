@@ -100,14 +100,12 @@ function php_file_tree_dir($directory, $return_link, $extensions = array(), $ver
 					// Get extension (prepend 'ext-' to prevent invalid classes from extensions that begin with numbers)
 					$ext = "ext-" . substr($this_file, strrpos($this_file, ".") + 1); 
 					$link = str_replace("[link]", "$directory/" . urlencode($this_file), $return_link);
-					if( $version !== "pico" ) {
-						$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
-					} else {
+					if( $version === "pico" ) {
 						$link = preg_replace("/\.\/content\//", "/", $link);	//remove content folder
 						$link = preg_replace("/\.md$/", "", $link);				//remove md
 						$this_file = preg_replace("/\.md$/", "", $this_file);	//remove md
-						$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
 					}
+					$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
 				}
 			}
 		}
