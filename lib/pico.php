@@ -143,10 +143,10 @@ class Pico {
 	// replace custom variables within the content
 	function custom_vars($c)
 	{
-		global $natureconfig;
+		global $customconfig;
 		$changedContent = $c;
 
-		foreach($natureconfig as $key=>$val){
+		foreach($customconfig as $key=>$val){
 			if(isset($val) && $val){
 				$changedContent = str_replace('%'.$key.'%', $val, $changedContent);
 			}
