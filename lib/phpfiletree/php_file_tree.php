@@ -87,10 +87,8 @@ function php_file_tree_dir($directory, $return_link, $extensions = array(), $ver
 				if( is_dir("$directory/$this_file") ) {
 					// Directory
 					$php_file_tree .= "<li class=\"pft-directory\"><a href=\"";
-					if( $version === "pico" ) {
-						if( file_exists( "$directory/$this_file"."/index.md" ) ) {
-							$php_file_tree .= preg_replace("/\.\/content\//", "/", "$directory/$this_file");
-						}
+					if( $version === "pico" && file_exists( "$directory/$this_file"."/index.md" ) ) {
+						$php_file_tree .= preg_replace("/\.\/content\//", "/", "$directory/$this_file");
 					} else {
 						$php_file_tree .= "#";
 					}
