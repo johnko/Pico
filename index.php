@@ -13,6 +13,7 @@ define('CACHE_DIR', LIB_DIR .'cache/');
 require('config.php');
 require(LIB_DIR .'markdown/markdown.php');
 require(LIB_DIR .'twig/lib/Twig/Autoloader.php');
+require(LIB_DIR .'phpfiletree/php_file_tree.php');
 require(LIB_DIR .'pico.php');
 $pico = new Pico();
 

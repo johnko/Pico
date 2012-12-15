@@ -31,7 +31,7 @@ class Pico {
 		}
 
 		// load the navigation
-		$navigation = $this->get_navigation();
+		$navigation = PhpFileTree("./content", "/[link]", array("md"), "pico");
 
 		// Get the file path
 		if($url) $file = CONTENT_DIR . $url;
